@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CNode: Node.js专业中文社区镜像</title>
+    <!-- <script src="src/js/vue.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.21/dist/vue.min.js"></script>
+
+    <!-- <script src="src/js/vue-router.js"></script> -->
+    <script src="https://cdn.bootcss.com/vue-router/3.0.2/vue-router.min.js"></script>
+    <!-- <script src="src/js/vue-resource.js"></script> -->
+    <!-- <script src="src/js/axios.js"></script> -->
+    <script src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.min.js"></script>
+    <!-- 引入样式 -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/element-ui@2.4.11/lib/theme-chalk/index.css"> -->
+    <!-- 引入组件库 -->
+    <!-- <script src="https://unpkg.com/element-ui@2.4.11/lib/index.js"></script> -->
+    <!-- 导航栏 -->
+    <style>
+        body {
+            width: 100%;
+            margin: 0;
+            background-color: #eee;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            margin: 0;
+            width: 100%;
+            background-color: black;
+            font-size: 15px;
+            color: white;
+            height: 50px;
+        }
+
+        .navbar .tag {
+            width: 1200px;
+            margin: 0 auto;
+            vertical-align: middle;
+        }
+
+        .navbar .tag a {
+            display: inline-block;
+            float: left;
+            width: 120px;
+        }
+
+        .navbar .tag a img {
+            width: 100%;
+            padding-top: 10px;
+        }
+
+        .navbar .tag span {
+            float: right;
+            margin: auto 0;
+            display: block;
+            line-height: 50px;
+            vertical-align: middle;
+        }
+    </style>
+    <!-- 话题目录 -->
+    <style>
+        .content {
+            width: 1200px;
+            margin: 0 auto;
+            margin-top: 20px;
+            background-color: #fff;
+        }
+
+        .content .headbar {
+            padding: 10px 0;
+            background-color: #f6f6f6;
+        }
+
+        .content .headbar a {
+            margin: 0 10px;
+            color: #80bd01;
+            text-decoration: none;
+        }
+
+        .content .cell {
+            padding: 10px;
+            height: 30px;
+            border-bottom: #eee solid 1px;
+            vertical-align: middle;
+
+        }
+        .content .cell:hover {
+            background-color:#eee;
+        }
+
+        .content .cell .user-avatar img {
+            width: 30px;
+            height: 30px;
+            vertical-align: middle;
+            border-radius: 4px;
+        }
+        .content .cell .count {
+            display: inline-block;
+            width: 8%;
+            text-align: center;
+        }
+        .content .cell .count .reply-count {
+            font-size: 14px;
+            color: #9e78c0;
+        }
+        .content .cell .count .read-count {
+            font-size: 10px;
+            color: #777;
+        }
+        .content .cell .tabspan {
+            display: inline-block;
+            text-align: center;
+            background-color: #80bd01;
+            color:#fff;
+            padding: 2px 4px;
+            font-size: 14px;
+            border-radius: 3px;
+        } 
+        .content .cell .topiclink {
+            text-decoration: none;
+            color: #000;
+            max-width: 70%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+        }
+        .content .cell .create-time {
+            /* display: inline-block; */
+            float: right;
+            color: #999;
+            padding: 3px 5px;
+            font-size: 15px;
+        }
+    </style>
+    <style>
+        .topic-content {
+            width: 1300px;
+            margin: 20px auto;
+
+        }
+
+        .topic-content a {
+            color: #42b983;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .topic-content .left {
+            padding: 20px 30px;
+            float: left;
+            width: 70%;
+            background-color: #fff;
+            -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .2);
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .2);
+        }
+
+        .topic-content .left h1 {
+            margin: 0;
+            font-size: 28px;
+            padding-bottom: 10px;
+        }
+
+        .topic-content .left .info {
+            font-size: 14px;
+            color: #838383;
+        }
+
+        .topic-content .left .content {
+            margin-top: 5px;
+            border-top: #ddd solid 1px;
+            width: 100%;
+            line-height: 1.6;
+        }
+
+        .topic-content .left .content blockquote {
+            border-left: 4px solid #42b983;
+            background-color: rgba(66, 185, 131, .1);
+            padding: 10px 0 10px 15px;
+            color: #777;
+            margin: 10px;
+        }
+
+        .topic-content .left .content img {
+            width: 100%;
+        }
+
+        .topic-content .left .content pre.prettyprint {
+            font-size: 14px;
+            background: #f7f7f7;
+            padding: 0 15px;
+        }
+
+        .topic-content .left .reply {
+            width: 100%;
+        }
+
+        .topic-content .left .reply h4 {
+            border: #eee solid 1px;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .topic-content .left .reply .replybox {
+            border: #eee solid 1px;
+            border-top: 0;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+
+        .topic-content .left .reply .replybox .replyer-avatar {
+            height: 40px;
+            width: 40px;
+            border-radius: 4px;
+        }
+
+        .topic-content .left .reply .replybox .replyerinfo {
+            padding: 10px 10px;
+            font-size: 14px;
+        }
+        .topic-content .left .reply .replybox .replyerinfo .loginname{
+            font-weight: 600;
+        }
+
+        .topic-content .left .reply .replybox .replytext {
+            padding-left: 60px;
+            width: 70%;
+        }
+
+        .topic-content .right {
+            float: right;
+            width: 24%;
+        }
+
+        .topic-content .right .author-info {
+            background-color: #fff;
+            padding: 20px;
+            -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .2);
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .2);
+        }
+
+        .topic-content .right .author-info .author-avatar {
+            height: 50px;
+            width: 50px;
+        }
+
+        .topic-content .right .author-info .authorname {
+            display: inline-block;
+            line-height: 50px;
+            vertical-align: top;
+            margin: 0;
+            padding-top: 0;
+            padding-left: 20px;
+            /* color:#42b983; */
+        }
+
+        .topic-content .right .author-info div,
+        .topic-content .right .recent-topic div {
+            margin: 10px 0 0 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .topic-content .right .recent-topic {
+            margin-top: 20px;
+            padding: 5px 20px 20px 20px;
+            background-color: #fff;
+            -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .2);
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .2);
+        }
+
+        .topic-content .right .recent-topic h3 {
+            padding: 15px;
+            margin: 0;
+            border-bottom: #ddd solid 1px;
+        }
+
+        /* .topic-content .right .recent-topic a {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        } */
+    </style>
+</head>
+
+<body>
+    <!-- https://cnodejs.org/api/v1/topics?page=1&limit=20&tab=all  一个cnode内容目录的api -->
+    <div id="app">
+        <app-nav></app-nav>
+        <router-view></router-view>
+        <app-footer></app-footer>
+    </div>
+
+    <template id="app-nav">
+        <nav class="navbar">
+            <div class="tag">
+                <router-link to="/">
+                    <img class="brandicon" src="src/img/cnodejs.86f6a7c2.svg" alt="" srcset="">
+                </router-link>
+                <!-- <span>
+                    关于
+                </span> -->
+            </div>
+        </nav>
+    </template>
+
+
+    <template id='topic-list'>
+        <div class="content" @scroll='scrollwatch'>
+            <div class="headbar">
+                <router-link v-for="a in tabs" :to='"/topiclist" + a.href'>
+                    {{ a.name }}
+                </router-link>
+            </div>
+            <div class="topic-list">
+                <div class="cell" v-for="topic in topiclist">
+
+                    <a :href="'/user/'+ topic.author.loginname" class="user-avatar">
+                        <img :src="topic.author.avatar_url" alt="" srcset="">
+                    </a>
+                    <div class="count">
+                        <span class="reply-count">{{ topic.reply_count }}/</span>
+                        <span class="read-count">{{ topic.visit_count }}</span>
+                    </div>
+                    <span class="tabspan">{{ transformtab(topic.tab) }}</span>
+                    <router-link :to="'/topic/'+topic.id" class='topiclink'>
+                        {{ topic.title }}
+                    </router-link>
+
+                    <span class="create-time">{{ gettimedelta(topic.last_reply_at) }}</span>
+
+                </div>
+            </div>
+        </div>
+    </template>
+
+
+    <template id="app-footer">
+        <!-- <h1>I am footer.</h1> -->
+    </template>
+
+
+
+
+    <template id="topiccontent">
+        <div class="topic-content">
+            <div class="left">
+                <h1>{{topictitle}}</h1>
+                <div class="info">
+                    <span>发布于 {{gettimedelta(createtime)}}</span>
+                    <span> • 作者：{{authorname}} • </span>
+                    <span>{{visitcount}}次浏览</span>
+                    <span> • 来自：{{tabname}}</span>
+                </div>
+                <div class="content" v-html='topiccontent'></div>
+                <div class="reply">
+                    <h4>{{replycount}} 回复</h4>
+                    <div class="replybox" v-for='(reply,index) in replies'>
+
+                        <img :src="reply.author.avatar_url" class="replyer-avatar">
+                        <div class="replyerinfo">
+                            <span>{{index+1}}楼</span>
+                            <span class="loginname">{{reply.author.loginname}}</span>
+                            <span>{{trans2localdate(reply.create_at)}}</span>
+                            <span>{{trans2localtime(reply.create_at)}}</span>
+                        </div>
+                        <div v-html="reply.content" class="replytext"></div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="right">
+                <div class="author-info">
+                    <img :src="authoravatarurl" class="author-avatar">
+                    <h4 class="authorname">{{authorname}}</h4>
+                    <div>积分：{{authorscore}}</div>
+                    <div>Github:&nbsp;
+                        <a :href="'https://github.com/'+authorgithubusername">{{ authorgithubusername }}</a></div>
+                    <div>注册时间： {{trans2localdate(authorlogintime)}}</div>
+                </div>
+                <div class="recent-topic">
+                    <h3>最近创建的话题</h3>
+                    <div v-for='recenttopic in authorrecenttopics'>
+                        <router-link :to="'/topic/'+recenttopic.id">
+                            {{recenttopic.title}}
+                        </router-link>
+                    </div>
+                </div>
+                <div class="recent-topic">
+                    <h3>最近参与的话题</h3>
+                    <div v-for='recenttopic in authorrecentreplies'>
+                        <router-link :to="'/topic/'+recenttopic.id">
+                            {{recenttopic.title}}
+                        </router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+
+
+    <script>
+        // 顶栏
+        var appNav = {
+            template: '#app-nav',
+        }
+
+        // 话题目录
+        var topicbox = {
+            data() {
+                return {
+                    topiclist: [],
+                    tabs: [
+                        { 'href': '/all', 'name': '全部' },
+                        { 'href': '/good', 'name': '精华' },
+                        { 'href': '/share', 'name': '分享' },
+                        { 'href': '/ask', 'name': '问答' },
+                        { 'href': '/job', 'name': '招聘' },
+                    ],
+                    pagenum: 1
+                }
+            },
+            props: ['cata'],
+            template: '#topic-list',
+            created: function () {
+                this.gettopicscross();
+
+            },
+            watch: {
+                'cata': function (Val, oldval) {
+                    this.pagenum = 1
+                    this.gettopicscross()
+                }
+            },
+            methods: {
+                'log': function () {
+                    // console.log(this.cata)
+                },
+                'gettopics': function () {
+                    axios.get(this.cata + '.json')
+                        .then((response) => {
+                            // console.log(response.data.data)
+                            // console.log(this)
+                            this.topiclist = response.data.data
+                        }).catch((err) => {
+                            console.log(err);
+                            console.log('导入失败')
+                        })
+                },
+                gettopicscross() {
+                    var pagenum = this.pagenum;
+                    var url = `https://cnodejs.org/api/v1/topics?page=${pagenum}&limit=20&tab=${this.cata}`;
+                    axios.get(url)
+                        .then((res) => {
+                            this.topiclist = res.data.data
+                            // console.log(this)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                },
+                'transformtab': function (tab) {
+                    switch (tab) {
+                        case 'share':
+                            return '分享';
+                            break;
+                        case 'ask':
+                            return '问答';
+                            break;
+                        case 'job':
+                            return '招聘';
+                            break;
+                        default:
+                            return ''
+                    }
+                },
+                'parsertimer': function (ISOtimestring) {
+                    var ts = new Date(ISOtimestring);
+                    return ts.getTime()
+                },
+                'gettimedelta': function (ISOtimestring) {
+                    var lrts = this.parsertimer(ISOtimestring);
+                    var ts = new Date();
+                    ts = ts.getTime();
+                    // deltats = ts - lrts;
+
+                    var minute = 1000 * 60;
+                    var diffValue = ts - lrts;
+                    var minC = diffValue / minute;
+                    // console.log(minC,'分钟')
+
+                    if (minC < 1) {
+                        return '刚刚发表';
+                    }
+                    if (minC < 60) {
+                        return parseInt(minC) + "分钟前";
+                    }
+                    minC = minC / 60;
+                    if (minC < 24) {
+                        return parseInt(minC) + '小时前'
+                    }
+                    minC = minC / 24;
+                    if (minC < 7) {
+                        return parseInt(minC) + '天前'
+                    }
+                    minC = minC / 7;
+                    if (minC < 5) {
+                        return parseInt(minC) + '周前'
+                    }
+                    minC = minC * 7 / 30;
+                    if (minC < 12) {
+                        return parseInt(minC) + '月前'
+                    }
+                    minC = minC / 12;
+
+                    return parseInt(minC) + '年前'
+
+                },
+                'scrollwatch': function () {
+                    var sumH =
+                        document.body.scrollHeight || document.documentElement.scrollHeight;
+                    var viewH = document.documentElement.clientHeight;
+                    var scrollH =
+                        document.body.scrollTop || document.documentElement.scrollTop;
+                    if (viewH + scrollH >= sumH) {
+                        this.updateTopics();
+                    }
+                },
+                updateTopics() {
+                    this.pagenum = this.pagenum + 1;
+                    var pagenum = this.pagenum;
+                    var url = `https://cnodejs.org/api/v1/topics?page=${pagenum}&limit=20&tab=${this.cata}`;
+                    axios.get(url)
+                        .then((res) => {
+                            this.topiclist.push(...res.data.data);
+                            // console.log(this)
+                        }).catch((err) => {
+                            console.log(err)
+                        })
+                    // console.log(this)
+                },
+
+            },
+            mounted() {
+                console.log('mounted')
+                var app = document.querySelector('#app')
+                console.log(app.scrollTop)
+                // // console.log(window)
+                // var _that = this
+                // app.scrollTop = app.scrollHeight
+                window.addEventListener('scroll', () => {
+                    // console.log(document.documentElement.scrollHeight)
+                    // console.log(document.documentElement.clientHeight)
+                    // console.log(document.documentElement.scrollTop)
+                    // // console.log(document.body.clientHeight)
+                    // // console.log(document.body.scrollHeight)
+                    this.scrollwatch();
+                    // console.log('scroll')
+                })
+            },
+
+        }
+
+
+        // 内容显示
+        var topiccontent = {
+            template: '#topiccontent',
+            data() {
+                return {
+                    'topictitle': '',
+                    'topiccontent': '',
+                    'createtime': '',
+                    'authorname': '',
+                    'authoravatarurl': '',
+                    'authorscore': '',
+                    'authorgithubusername': '',
+                    'authorlogintime': '',
+                    'authorrecenttopics': [],
+                    'authorrecentreplies': [],
+                    'visitcount': '',
+                    'tab': '',
+                    'replycount': '',
+                    'replies': '',
+                }
+            },
+            props: ['topicid'],
+            created: function () {
+                this.getcontent()
+            },
+            watch: {
+                'topicid': function () {
+                    this.getcontent()
+                },
+            },
+            computed: {
+                tabname() {
+                    switch (this.tab) {
+                        case 'share':
+                            return '分享';
+                            break;
+                        case 'ask':
+                            return '问答';
+                            break;
+                        case 'job':
+                            return '招聘';
+                            break;
+                        default:
+                            return ''
+                    }
+                },
+            },
+            methods: {
+                'getcontent': function () {
+                    var url = `https://cnodejs.org/api/v1/topic/${this.topicid}`;
+                    axios.get(url)
+                        .then((response) => {
+                            console.log(response.data.data)
+                            // console.log(this)
+                            this.topiccontent = response.data.data.content
+                            this.topictitle = response.data.data.title
+                            this.createtime = response.data.data['create_at']
+                            this.authorname = response.data.data.author.loginname
+                            this.authoravatarurl = response.data.data.author['avatar_url']
+                            this.visitcount = response.data.data['visit_count']
+                            this.replycount = response.data.data['reply_count']
+                            this.tab = response.data.data.tab
+                            this.replies = response.data.data.replies
+                            this.getauthorinfo();
+                        }).catch((err) => {
+                            console.log(err);
+                            console.log('导入失败')
+                        })
+                },
+                getauthorinfo() {
+                    let url = `https://cnodejs.org/api/v1/user/${this.authorname}`;
+                    axios.get(url)
+                        .then((response) => {
+                            console.log(response.data.data)
+                            this.authorscore = response.data.data.score
+                            this.authorgithubusername = response.data.data.githubUsername
+                            this.authorlogintime = response.data.data.create_at
+                            this.authorrecenttopics = response.data.data.recent_topics
+                            this.authorrecentreplies = response.data.data.recent_replies
+                            // console.log(this.authorrecentreplies)
+                            // console.log(this)
+                            // this.topiccontent = response.data.data.content
+
+                        }).catch((err) => {
+                            console.log(err);
+                            console.log('导入失败')
+                        })
+                },
+                'parsertimer': function (ISOtimestring) {
+                    var ts = new Date(ISOtimestring);
+                    return ts.getTime()
+                },
+                'gettimedelta': function (ISOtimestring) {
+                    var lrts = this.parsertimer(ISOtimestring);
+                    var ts = new Date();
+                    ts = ts.getTime();
+                    // deltats = ts - lrts;
+
+                    var minute = 1000 * 60;
+                    var diffValue = ts - lrts;
+                    var minC = diffValue / minute;
+                    // console.log(minC,'分钟')
+
+                    if (minC < 1) {
+                        return '刚刚发表';
+                    }
+                    if (minC < 60) {
+                        return parseInt(minC) + "分钟前";
+                    }
+                    minC = minC / 60;
+                    if (minC < 24) {
+                        return parseInt(minC) + '小时前'
+                    }
+                    minC = minC / 24;
+                    if (minC < 7) {
+                        return parseInt(minC) + '天前'
+                    }
+                    minC = minC / 7;
+                    if (minC < 5) {
+                        return parseInt(minC) + '周前'
+                    }
+                    minC = minC * 7 / 30;
+                    if (minC < 12) {
+                        return parseInt(minC) + '月前'
+                    }
+                    minC = minC / 12;
+
+                    return parseInt(minC) + '年前'
+
+                },
+                trans2localdate (ISOtimestring) {
+                    let t = new Date(ISOtimestring);
+                    return t.toLocaleDateString()
+                },
+                trans2localtime(ISOtimestring) {
+                    let t = new Date(ISOtimestring);
+                    return t.toLocaleTimeString()
+                },
+            }
+
+        }
+
+        // 路由部分
+        const router = new VueRouter({
+            routes: [
+                { path: '/topiclist/:cata', component: topicbox, props: true },
+                { path: '/topic/:topicid', component: topiccontent, props: true },
+                { path: '/', redirect: '/topiclist/all' }
+            ] // (缩写) 相当于 routes: routes
+        })
+
+
+        var appFooter = {
+            template: '#app-footer',
+        }
+
+
+        // 主入口
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                msg: 'hello vue!',
+                topiccon: ''
+            },
+            methods: {},
+            components: {
+                'app-nav': appNav,
+                'app-footer': appFooter
+            },
+            router,
+
+        })
+        // console.log(vm)
+
+        // window.onscroll=function(){
+        //     console.log('scrolling')
+        // }
+    </script>
+</body>
+
+</html>
